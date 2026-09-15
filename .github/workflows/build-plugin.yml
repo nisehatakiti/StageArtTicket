@@ -1,0 +1,28 @@
+name: Build StageArtTicket
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build plugin ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf dist stageart-ticket.zip
+          mkdir -p dist/StageArtTicket
+          rsync -a --exclude='.git' --exclude='.github' --exclude='dist' --exclude='*.zip' ./ dist/StageArtTicket/
+          cd dist
+          zip -r ../stageart-ticket.zip StageArtTicket >/dev/null
+      - name: Upload plugin ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: StageArtTicket
+          path: stageart-ticket.zip
+          if-no-files-found: error
