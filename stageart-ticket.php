@@ -15,4 +15,9 @@
 declare(strict_types=1);
 if(!defined('ABSPATH'))exit;
 define('STAGEART_TICKET_VERSION','0.5.0');
-define('STAGEART_TICKET_FILE',__FILE__);def ine('STAGEART_TICKET_DIR',plugin_dir_path(__FILE__));
+define('STAGEART_TICKET_FILE',__FILE__);
+define('STAGEART_TICKET_DIR',plugin_dir_path(__FILE__));
+define('STAGEART_TICKET_URL',plugin_dir_url(__FILE__));
+spl_autoload_register(static function(string $class):void{$prefix='StageArtTicket\\';if(!str_starts_with($class,$prefix))return;$relative=substr($class,strlen($prefix));$path=STAGEART_TICKET_DIR.'src/'.str_replace('\\','/',$relative).'.php';if(is_file($path))require_once $path;});
+add_action('plugins_loaded',static function():void{if(!class_exists('StageArtTicket\\Plugin'))return;(new StageArtTicket\Plugin())->boot();});
+register_activation_hook(STAGEART_TICKET_FILE,static function():void{if(class_exists('StageArtTicket\\Infrastructure\\Schema\\TicketMigration'))StageArtTicket\Infrastructure\Schema\TicketMigration::ensure();if(class_exists('StageArtTicket\\Presentation\\PublicSite\\TicketRouter'))(new StageArtTicket\Presentation\PublicSite\TicketRouter())->rewrite();flush_rewrite_rules();});
